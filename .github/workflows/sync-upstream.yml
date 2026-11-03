@@ -1,0 +1,112 @@
+# Olauncher+ fork: weekly upstream sync -> test -> signed release.
+#
+# 1. Merges tanujnotes/Olauncher master into `petra`. Stops if there is nothing new
+#    (unless run manually).
+# 2. Runs the unit tests, including the fork drift guard (ExtraHomeSlotsTest), and builds
+#    the release APK.
+# 3. Only if everything passes: pushes the merge and publishes a GitHub release with the
+#    signed APK, which Obtainium on the phone picks up.
+#
+# A merge conflict or failing test fails the run (GitHub emails the repo owner) and
+# nothing is pushed or released. Fix locally per FORK.md, push, then "Run workflow".
+
+name: Sync upstream & release
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: petra
+          fetch-depth: 0
+
+      - name: Merge upstream
+        id: merge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/tanujnotes/Olauncher.git
+          git fetch upstream master
+          if git merge-base --is-ancestor upstream/master HEAD; then
+            echo "Already up to date with upstream."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git merge --no-edit upstream/master || {
+              echo "::error::Merge conflict with upstream. Resolve locally (see FORK.md), push, then re-run."
+              git diff --name-only --diff-filter=U
+              exit 1
+            }
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Decide whether to build
+        id: go
+        run: |
+          if [ "${{ steps.merge.outputs.changed }}" = "true" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.go.outputs.build == 'true'
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Restore signing key
+        if: steps.go.outputs.build == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.PETRA_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret PETRA_KEYSTORE_BASE64 is not set; cannot sign the release."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/petra.jks"
+
+      - name: Test and build
+        if: steps.go.outputs.build == 'true'
+        env:
+          PETRA_KEYSTORE_FILE: ${{ runner.temp }}/petra.jks
+          PETRA_KEYSTORE_PASSWORD: ${{ secrets.PETRA_KEYSTORE_PASSWORD }}
+          PETRA_KEY_ALIAS: petra
+          PETRA_KEY_PASSWORD: ${{ secrets.PETRA_KEYSTORE_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew testReleaseUnitTest assembleRelease -PforkBuild=${{ github.run_number }} --no-daemon
+
+      - name: Push merge
+        if: steps.merge.outputs.changed == 'true'
+        run: git push origin HEAD:petra
+
+      - name: Publish release
+        if: steps.go.outputs.build == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -m1 'versionName "' app/build.gradle | sed -E 's/.*versionName "([^"]+)".*/\1/')
+          TAG="${VERSION}-plus.${{ github.run_number }}"
+          cp app/build/outputs/apk/release/app-release.apk "Olauncher-plus-${TAG}.apk"
+          gh release create "$TAG" "Olauncher-plus-${TAG}.apk" \
+            --target "$(git rev-parse HEAD)" \
+            --title "Olauncher+ ${TAG}" \
+            --notes "Upstream ${VERSION} + fork changes (see FORK.md). Built by ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Clean up signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/petra.jks"

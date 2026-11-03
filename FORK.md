@@ -45,6 +45,17 @@ adb install -r app/build/outputs/apk/release/app-release.apk
 
 Conflicts, if any, will be at the marked hooks.
 
+### Automatic (GitHub Actions + Obtainium)
+
+`.github/workflows/sync-upstream.yml` runs every Monday (or manually via **Actions → Sync upstream & release → Run workflow**):
+merge `upstream/master` → run tests (incl. drift guard) → build signed APK → push the merge → publish a release tagged `<upstream version>-plus.<run number>`.
+If there's nothing new upstream, it does nothing. A conflict or failing test stops the run before anything is pushed, and GitHub emails the repo owner.
+
+Required repo secrets: `PETRA_KEYSTORE_BASE64` (base64 of the keystore) and `PETRA_KEYSTORE_PASSWORD`.
+
+On the phone, [Obtainium](https://github.com/ImranR98/Obtainium) tracks `https://github.com/Skarlet0x/Olauncher` releases and installs updates.
+GitHub pauses scheduled workflows after 60 days without repo activity. If that happens, re-enable it in the Actions tab.
+
 ## Signing
 
 Release builds are signed with the key in `~/.android/olauncher-petra.jks`. Credentials come from environment variables or `~/.gradle/gradle.properties`:

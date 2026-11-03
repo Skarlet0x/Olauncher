@@ -8,6 +8,9 @@ def signingValue = { String name ->
 android {
     defaultConfig {
         applicationId "app.olauncher.petra"
+        // e.g. "v6.11.3-plus.12": upstream version + fork build number (CI passes -PforkBuild=<n>).
+        // Release tags use the same string so the phone's updater (Obtainium) can match versions.
+        versionName "${android.defaultConfig.versionName}-plus.${project.findProperty('forkBuild') ?: 'local'}"
     }
 
     signingConfigs {
