@@ -102,7 +102,8 @@ jobs:
           VERSION=$(grep -m1 'versionName "' app/build.gradle | sed -E 's/.*versionName "([^"]+)".*/\1/')
           TAG="${VERSION}-plus.${{ github.run_number }}"
           cp app/build/outputs/apk/release/app-release.apk "Olauncher-plus-${TAG}.apk"
-          gh release create "$TAG" "Olauncher-plus-${TAG}.apk" \
+          # --repo is required: with an "upstream" remote, gh would otherwise target the parent repo.
+          gh release create "$TAG" "Olauncher-plus-${TAG}.apk" --repo "$GITHUB_REPOSITORY" \
             --target "$(git rev-parse HEAD)" \
             --title "Olauncher+ ${TAG}" \
             --notes "Upstream ${VERSION} + fork changes (see FORK.md). Built by ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
