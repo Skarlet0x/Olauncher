@@ -179,6 +179,10 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
+        <!-- Olauncher+ fork: extra home slots, see fork/ExtraHomeSlots.kt -->
+        <TextView android:id="@+id/homeApp9" style="@style/ForkHomeAppSlot" android:tag="9" tools:visibility="visible" />
+        <TextView android:id="@+id/homeApp10" style="@style/ForkHomeAppSlot" android:tag="10" tools:visibility="visible" />
+
     </LinearLayout>
 
     <TextView

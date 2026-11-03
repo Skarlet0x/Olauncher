@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import android.view.Gravity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
+import app.olauncher.fork.ExtraHomeSlots
+import app.olauncher.fork.ExtraSlotStore
 
 class Prefs(context: Context) {
     private val PREFS_FILENAME = "app.olauncher"
@@ -119,6 +121,7 @@ class Prefs(context: Context) {
     private val IS_SHORTCUT_SWIPE_RIGHT = "IS_SHORTCUT_SWIPE_RIGHT"
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
+    val extraSlots = ExtraSlotStore(context) // Olauncher+ fork
 
     var firstOpen: Boolean
         get() = prefs.getBoolean(FIRST_OPEN, true)
@@ -543,7 +546,7 @@ class Prefs(context: Context) {
             6 -> prefs.getString(APP_NAME_6, "").toString()
             7 -> prefs.getString(APP_NAME_7, "").toString()
             8 -> prefs.getString(APP_NAME_8, "").toString()
-            else -> ""
+            else -> extraSlots.getString(ExtraHomeSlots.KEY_NAME, location)  // Olauncher+ fork
         }
     }
 
@@ -557,7 +560,7 @@ class Prefs(context: Context) {
             6 -> prefs.getString(APP_PACKAGE_6, "").toString()
             7 -> prefs.getString(APP_PACKAGE_7, "").toString()
             8 -> prefs.getString(APP_PACKAGE_8, "").toString()
-            else -> ""
+            else -> extraSlots.getString(ExtraHomeSlots.KEY_PACKAGE, location)  // Olauncher+ fork
         }
     }
 
@@ -571,7 +574,7 @@ class Prefs(context: Context) {
             6 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_6, "").toString()
             7 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_7, "").toString()
             8 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_8, "").toString()
-            else -> ""
+            else -> extraSlots.getString(ExtraHomeSlots.KEY_ACTIVITY_CLASS_NAME, location)  // Olauncher+ fork
         }
     }
 
@@ -585,7 +588,7 @@ class Prefs(context: Context) {
             6 -> prefs.getString(APP_USER_6, "").toString()
             7 -> prefs.getString(APP_USER_7, "").toString()
             8 -> prefs.getString(APP_USER_8, "").toString()
-            else -> ""
+            else -> extraSlots.getString(ExtraHomeSlots.KEY_USER, location)  // Olauncher+ fork
         }
     }
 
@@ -599,7 +602,7 @@ class Prefs(context: Context) {
             6 -> shortcutId6
             7 -> shortcutId7
             8 -> shortcutId8
-            else -> ""
+            else -> extraSlots.getString(ExtraHomeSlots.KEY_SHORTCUT_ID, location)  // Olauncher+ fork
         }
     }
 
@@ -613,7 +616,7 @@ class Prefs(context: Context) {
             6 -> isShortcut6
             7 -> isShortcut7
             8 -> isShortcut8
-            else -> false
+            else -> extraSlots.getBoolean(ExtraHomeSlots.KEY_IS_SHORTCUT, location)  // Olauncher+ fork
         }
     }
 
@@ -627,11 +630,12 @@ class Prefs(context: Context) {
             6 -> appActivityClassName6 = activityClassName
             7 -> appActivityClassName7 = activityClassName
             8 -> appActivityClassName8 = activityClassName
+            else -> extraSlots.setString(ExtraHomeSlots.KEY_ACTIVITY_CLASS_NAME, location, activityClassName)  // Olauncher+ fork
         }
     }
 
     fun updateAppActivityClassName(packageName: String, activityClassName: String) {
-        for (i in 1..8) {
+        for (i in 1..ExtraHomeSlots.MAX) {  // Olauncher+ fork
             if (getAppPackage(i) == packageName) setAppActivityClassName(i, activityClassName)
         }
         if (clockAppPackage == packageName) clockAppClassName = activityClassName

@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
+import app.olauncher.fork.ExtraHomeSlots
 import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.data.AppModel
@@ -325,6 +326,7 @@ class AppDrawerFragment : BaseFragment() {
                 Constants.FLAG_SET_HOME_APP_6 -> prefs.appName6 = name
                 Constants.FLAG_SET_HOME_APP_7 -> prefs.appName7 = name
                 Constants.FLAG_SET_HOME_APP_8 -> prefs.appName8 = name
+                in ExtraHomeSlots.EXTRA_SLOTS -> prefs.extraSlots.setString(ExtraHomeSlots.KEY_NAME, flag, name)  // Olauncher+ fork
             }
             closeDrawer()
         }

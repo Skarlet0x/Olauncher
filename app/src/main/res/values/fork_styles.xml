@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Olauncher+ fork: extra home slots (see fork/ExtraHomeSlots.kt).
+     Mirrors the attributes upstream sets on homeApp1..8 in layout/fragment_home.xml;
+     ExtraHomeSlotsTest fails if those drift. -->
+<resources>
+    <style name="ForkHomeAppSlot" parent="TextLarge">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:focusable">true</item>
+        <item name="android:hint">@string/app</item>
+        <item name="android:paddingVertical">@dimen/home_app_padding_vertical</item>
+        <item name="android:visibility">gone</item>
+    </style>
+</resources>

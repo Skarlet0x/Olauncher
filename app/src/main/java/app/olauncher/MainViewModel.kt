@@ -20,6 +20,7 @@ import androidx.work.WorkManager
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
+import app.olauncher.fork.ExtraHomeSlots
 import app.olauncher.helper.SingleLiveEvent
 import app.olauncher.helper.WallpaperWorker
 import app.olauncher.helper.formattedTimeSpent
@@ -96,6 +97,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Constants.FLAG_SET_HOME_APP_6 -> saveHomeApp(appModel, 6)
             Constants.FLAG_SET_HOME_APP_7 -> saveHomeApp(appModel, 7)
             Constants.FLAG_SET_HOME_APP_8 -> saveHomeApp(appModel, 8)
+            in ExtraHomeSlots.EXTRA_SLOTS -> saveHomeApp(appModel, flag)  // Olauncher+ fork
 
             Constants.FLAG_SET_SWIPE_LEFT_APP -> saveSwipeApp(appModel, isLeft = true)
             Constants.FLAG_SET_SWIPE_RIGHT_APP -> saveSwipeApp(appModel, isLeft = false)
@@ -200,6 +202,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         prefs.isShortcut8 = false
                         prefs.shortcutId8 = ""
                     }
+
+                    else -> prefs.extraSlots.save(position, appModel.appLabel, appModel.appPackage, appModel.user.toString(), appModel.activityClassName, false, "")  // Olauncher+ fork
                 }
             }
 
@@ -276,6 +280,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         prefs.isShortcut8 = true
                         prefs.shortcutId8 = appModel.shortcutId
                     }
+
+                    else -> prefs.extraSlots.save(position, appModel.appLabel, appModel.appPackage, appModel.user.toString(), null, true, appModel.shortcutId)  // Olauncher+ fork
                 }
             }
         }

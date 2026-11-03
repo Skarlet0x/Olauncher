@@ -30,3 +30,10 @@ android {
         }
     }
 }
+
+// ExtraHomeSlotsTest reads upstream sources at runtime; declare them so Gradle
+// re-runs the drift guard whenever they change instead of reporting UP-TO-DATE.
+tasks.withType(Test).configureEach {
+    inputs.dir("src/main/java").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("src/main/res").withPathSensitivity(PathSensitivity.RELATIVE)
+}

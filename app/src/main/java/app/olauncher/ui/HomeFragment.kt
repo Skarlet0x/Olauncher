@@ -24,6 +24,9 @@ import androidx.core.view.setPadding
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import app.olauncher.fork.extraSlotOf
+import app.olauncher.fork.extraSlotViews
+import app.olauncher.fork.populateExtraSlots
 import app.olauncher.MainViewModel
 import app.olauncher.R
 import app.olauncher.data.AppModel
@@ -140,6 +143,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
             R.id.homeApp6 -> showAppList(Constants.FLAG_SET_HOME_APP_6, prefs.appName6.isNotEmpty(), true)
             R.id.homeApp7 -> showAppList(Constants.FLAG_SET_HOME_APP_7, prefs.appName7.isNotEmpty(), true)
             R.id.homeApp8 -> showAppList(Constants.FLAG_SET_HOME_APP_8, prefs.appName8.isNotEmpty(), true)
+            in binding.extraSlotViews().map { it.id } -> binding.extraSlotOf(view.id)?.let { showAppList(it, prefs.getAppName(it).isNotEmpty(), true) }  // Olauncher+ fork
             R.id.clock -> {
                 showAppList(Constants.FLAG_SET_CLOCK_APP)
                 prefs.clockAppPackage = ""
@@ -220,6 +224,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.homeApp6.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp6))
         binding.homeApp7.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp7))
         binding.homeApp8.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp8))
+        binding.extraSlotViews().forEach { it.setOnTouchListener(getViewSwipeTouchListener(context, it)) }  // Olauncher+ fork
     }
 
     private fun initClickListeners() {
@@ -252,6 +257,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.homeApp6.setOnLongClickListener(this)
         binding.homeApp7.setOnLongClickListener(this)
         binding.homeApp8.setOnLongClickListener(this)
+        binding.extraSlotViews().forEach { it.setOnClickListener(this); it.setOnLongClickListener(this) }  // Olauncher+ fork
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
@@ -266,6 +272,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.homeApp6.gravity = horizontalGravity
         binding.homeApp7.gravity = horizontalGravity
         binding.homeApp8.gravity = horizontalGravity
+        binding.extraSlotViews().forEach { it.gravity = horizontalGravity }  // Olauncher+ fork
     }
 
     private fun populateDateTime() {
@@ -377,6 +384,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
             prefs.appName8 = ""
             prefs.appPackage8 = ""
         }
+        binding.populateExtraSlots(homeAppsNum, prefs.extraSlots) { view, slot -> setHomeAppText(view, prefs.getAppName(slot), prefs.getAppPackage(slot), prefs.getAppUser(slot), prefs.getIsShortcut(slot), prefs.getShortcutId(slot)) }  // Olauncher+ fork
     }
 
     private fun setHomeAppText(
@@ -434,6 +442,7 @@ class HomeFragment : BaseFragment(), View.OnClickListener, View.OnLongClickListe
         binding.homeApp6.visibility = View.GONE
         binding.homeApp7.visibility = View.GONE
         binding.homeApp8.visibility = View.GONE
+        binding.extraSlotViews().forEach { it.visibility = View.GONE }  // Olauncher+ fork
     }
 
     private fun launchAppOrShortcut(
