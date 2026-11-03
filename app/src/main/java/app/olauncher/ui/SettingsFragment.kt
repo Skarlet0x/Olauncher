@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import app.olauncher.fork.ExtraHomeSlots
+import app.olauncher.fork.createHomeAppsCountDialog
 import app.olauncher.BuildConfig
 import app.olauncher.MainViewModel
 import app.olauncher.R
@@ -223,11 +223,7 @@ class SettingsFragment : BaseFragment(), View.OnClickListener, View.OnLongClickL
     // Popup menus
 
     private fun showHomeAppsNumMenu(anchor: View) {
-        anchor.showPopupMenu(
-            configure = { menu ->
-                for (num in 0..ExtraHomeSlots.MAX) menu.add(Menu.NONE, num, num, num.toString())  // Olauncher+ fork
-            }
-        ) { item -> updateHomeAppsNum(item.itemId) }
+        showDialog(requireContext().createHomeAppsCountDialog(prefs.homeAppsNum) { updateHomeAppsNum(it) })  // Olauncher+ fork
     }
 
     private fun showDateTimeMenu(anchor: View) {
