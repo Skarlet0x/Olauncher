@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fork: distinct name so it is distinguishable from the Play Store Olauncher. -->
+<resources>
+    <string name="app_name" translatable="false">Olauncher+</string>
+</resources>

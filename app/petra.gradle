@@ -1,0 +1,32 @@
+// Fork-specific build settings, kept out of build.gradle so upstream merges stay clean.
+// Installs side-by-side with the Play Store Olauncher.
+
+def signingValue = { String name ->
+    System.getenv(name) ?: (project.hasProperty(name) ? project.property(name) : null)
+}
+
+android {
+    defaultConfig {
+        applicationId "app.olauncher.petra"
+    }
+
+    signingConfigs {
+        petra {
+            def storePath = signingValue("PETRA_KEYSTORE_FILE")
+            if (storePath) {
+                storeFile file(storePath)
+                storePassword signingValue("PETRA_KEYSTORE_PASSWORD")
+                keyAlias signingValue("PETRA_KEY_ALIAS")
+                keyPassword signingValue("PETRA_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (signingConfigs.petra.storeFile != null) {
+                signingConfig signingConfigs.petra
+            }
+        }
+    }
+}

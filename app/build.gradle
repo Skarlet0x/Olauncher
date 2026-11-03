@@ -70,3 +70,5 @@ dependencies {
 
     testImplementation libs.junit
 }
+
+apply from: 'petra.gradle'
